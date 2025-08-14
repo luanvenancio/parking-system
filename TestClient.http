@@ -1,0 +1,45 @@
+@baseUrl = http://localhost:5275
+
+### Get all reservations
+GET {{baseUrl}}/api/Reservations
+Content-Type: application/json
+
+### Get reservation by ID
+GET {{baseUrl}}/api/Reservations/20991d8d-f049-41f7-ac67-172699f16916
+Content-Type: application/json
+
+### Get reservations by user ID
+GET {{baseUrl}}/api/Reservations/user/7f544c30-835c-4a02-9e31-35dd94134d68
+Content-Type: application/json
+
+### Get reservations by parking spot ID
+GET {{baseUrl}}/api/Reservations/spot/f953e7c6-7821-43e8-a100-49ed31044859
+Content-Type: application/json
+
+### Get all parking spots
+GET {{baseUrl}}/api/ParkingSpots/
+Content-Type: application/json
+
+### Create a new reservation
+POST {{baseUrl}}/api/Reservations
+Content-Type: application/json
+
+{
+  "startTime": "2023-12-01T10:00:00",
+  "endTime": "2023-12-01T12:00:00",
+  "userId": "7f544c30-835c-4a02-9e31-35dd94134d68",
+  "carId": "beee4886-bc40-412f-a200-49bd119178ce",
+  "parkingSpotId": "c265f5e3-01cb-41b7-ad39-aa709c951675"
+}
+
+### Update reservation status
+PATCH {{baseUrl}}/api/Reservations/20991d8d-f049-41f7-ac67-172699f16916/status
+Content-Type: application/json
+
+{
+  "status": 2
+}
+
+### Cancel reservation
+POST {{baseUrl}}/api/Reservations/20991d8d-f049-41f7-ac67-172699f16916/cancel
+Content-Type: application/json

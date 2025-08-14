@@ -1,0 +1,10 @@
+# Standard Visual Studio .gitignore
+## Ignore all files in the obj folder
+obj/
+## Ignore all files in the bin folder
+bin/
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
