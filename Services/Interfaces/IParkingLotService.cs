@@ -11,14 +11,14 @@ namespace ParkingSystem.Services.Interfaces
         /// Get all parking lots
         /// </summary>
         /// <returns>Collection of parking lot DTOs</returns>
-        Task<IEnumerable<ParkingLotDto>> GetAllParkingLotsAsync();
+        Task<IEnumerable<ParkingLotDetailDto>> GetAllParkingLotsAsync();
 
         /// <summary>
         /// Get a specific parking lot by id
         /// </summary>
         /// <param name="id">Parking lot id</param>
         /// <returns>Parking lot DTO or null if not found</returns>
-        Task<ParkingLotDto?> GetParkingLotByIdAsync(Guid id);
+        Task<ParkingLotDetailDto?> GetParkingLotByIdAsync(Guid id);
 
         /// <summary>
         /// Create a new parking lot

@@ -1,23 +1,69 @@
 @baseUrl = http://localhost:5275
+@parkingLotId = 04b02de7-fd4a-41a6-bb5b-d6cde6f05eb1
+@reservationId = 76a29891-8a5f-4a5a-a059-c52e16ad07d5
+@userId = 35d4ec9a-5efe-46ee-9455-78ab02c1d2ea
+@carId = b0c72b07-3034-4f19-905e-7e65a1a9ce61
+@parkingSpotId = 2fa5b8ce-207f-4193-8fae-653d4c027be0
+
+
+# Parking Lots API
+
+### Get all parking lots 
+GET {{baseUrl}}/api/ParkingLots
+Content-Type: application/json
+
+### Get a specific parking lot by ID 
+GET {{baseUrl}}/api/ParkingLots/{{parkingLotId}}
+Content-Type: application/json
+
+### Create a new parking lot
+# @name newParkingLot
+POST {{baseUrl}}/api/ParkingLots
+Content-Type: application/json
+
+{
+  "name": "Shopping Center Garage",
+  "address": "789 Mall Ave, Suburbia",
+  "description": "Covered parking with direct mall access.",
+  "operatingHours": "Mon-Sun 8am-12am",
+  "latitude": 34.0567,
+  "longitude": -118.2499
+}
+
+### Update an existing parking lot
+PUT {{baseUrl}}/api/ParkingLots/{{parkingLotId}}
+Content-Type: application/json
+
+{
+  "name": "Downtown Parking (Updated)",
+  "address": "123 Main St, Downtown (Renovated)",
+  "description": "Central parking facility with multiple levels. Now with EV charging.",
+  "operatingHours": "24/7",
+  "latitude": 40.7129,
+  "longitude": -74.0061
+}
+
+### Delete a parking lot
+DELETE {{baseUrl}}/api/ParkingLots/{{parkingLotId}}
+Content-Type: application/json
+
+
+# Reservations API
 
 ### Get all reservations
 GET {{baseUrl}}/api/Reservations
 Content-Type: application/json
 
 ### Get reservation by ID
-GET {{baseUrl}}/api/Reservations/20991d8d-f049-41f7-ac67-172699f16916
+GET {{baseUrl}}/api/Reservations/{{reservationId}}
 Content-Type: application/json
 
 ### Get reservations by user ID
-GET {{baseUrl}}/api/Reservations/user/7f544c30-835c-4a02-9e31-35dd94134d68
+GET {{baseUrl}}/api/Reservations/user/{{userId}}
 Content-Type: application/json
 
 ### Get reservations by parking spot ID
-GET {{baseUrl}}/api/Reservations/spot/f953e7c6-7821-43e8-a100-49ed31044859
-Content-Type: application/json
-
-### Get all parking spots
-GET {{baseUrl}}/api/ParkingSpots/
+GET {{baseUrl}}/api/Reservations/spot/{{parkingSpotId}}
 Content-Type: application/json
 
 ### Create a new reservation
@@ -25,21 +71,29 @@ POST {{baseUrl}}/api/Reservations
 Content-Type: application/json
 
 {
-  "startTime": "2023-12-01T10:00:00",
-  "endTime": "2023-12-01T12:00:00",
-  "userId": "7f544c30-835c-4a02-9e31-35dd94134d68",
-  "carId": "beee4886-bc40-412f-a200-49bd119178ce",
-  "parkingSpotId": "c265f5e3-01cb-41b7-ad39-aa709c951675"
+  "startTime": "2025-12-01T10:00:00",
+  "endTime": "2025-12-01T12:00:00",
+  "userId": "{{userId}}",
+  "carId": "{{carId}}",
+  "parkingSpotId": "{{parkingSpotId}}"
 }
 
-### Update reservation status
-PATCH {{baseUrl}}/api/Reservations/20991d8d-f049-41f7-ac67-172699f16916/status
+### Update reservation status (Example: Set to 'Completed')
+PATCH {{baseUrl}}/api/Reservations/{{reservationId}}/status
 Content-Type: application/json
 
 {
   "status": 2
 }
 
-### Cancel reservation
-POST {{baseUrl}}/api/Reservations/20991d8d-f049-41f7-ac67-172699f16916/cancel
+### Cancel a reservation
+POST {{baseUrl}}/api/Reservations/{{reservationId}}/cancel
+Content-Type: application/json
+
+
+
+# Parking Spots API
+
+### Get all parking spots
+GET {{baseUrl}}/api/ParkingSpots
 Content-Type: application/json

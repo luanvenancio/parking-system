@@ -15,20 +15,26 @@ namespace ParkingSystem.Repositories.Implementations
         {
         }
 
+
+        private IQueryable<ParkingLot> GetFullParkingLotDetails()
+        {
+            return _context.ParkingLots
+                .Include(pl => pl.ParkingSpots)
+                    .ThenInclude(ps => ps.SpotType)
+                        .ThenInclude(st => st.Fee)
+                            .ThenInclude(f => f.FeeRules);
+        }
         /// <inheritdoc/>
         public async Task<ParkingLot?> GetParkingLotWithSpotsAsync(Guid id)
         {
-            return await _context.ParkingLots
-                .Include(pl => pl.ParkingSpots)
-                    .ThenInclude(ps => ps.SpotType)
+            return await GetFullParkingLotDetails()
                 .FirstOrDefaultAsync(pl => pl.Id == id);
         }
 
         /// <inheritdoc/>
         public async Task<IEnumerable<ParkingLot>> GetAllWithSpotCountAsync()
         {
-            return await _context.ParkingLots
-                .Include(pl => pl.ParkingSpots)
+            return await GetFullParkingLotDetails()
                 .ToListAsync();
         }
 

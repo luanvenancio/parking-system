@@ -17,22 +17,78 @@ namespace ParkingSystem.Services.Implementations
             _parkingLotRepository = parkingLotRepository;
         }
 
-        /// <inheritdoc/>
-        public async Task<IEnumerable<ParkingLotDto>> GetAllParkingLotsAsync()
+        private ParkingLotDetailDto MapToDetailDto(ParkingLot parkingLot)
         {
-            var parkingLots = await _parkingLotRepository.GetAllWithSpotCountAsync();
+            var totalSpots = parkingLot.ParkingSpots.Count;
+            var availableSpots = parkingLot.ParkingSpots.Count(ps => ps.Status == SpotStatus.Available);
+            var occupiedSpots = totalSpots - availableSpots;
 
-            return parkingLots.Select(pl => new ParkingLotDto
+            var spotTypesDetails = parkingLot.ParkingSpots
+                .Where(ps => ps.SpotType != null)
+                .GroupBy(ps => ps.SpotType)
+               .Select(g =>
+        {
+            var total = g.Count();
+            var available = g.Count(s => s.Status == SpotStatus.Available);
+            var hourlyRate = g.Key.Fee?.FeeRules?.FirstOrDefault(r => r.ChargeType == ChargeType.Hourly)?.ChargeAmount;
+
+            return new SpotTypeDetailDto
             {
-                Id = pl.Id,
-                Name = pl.Name,
-                Address = pl.Address,
-                TotalSpots = pl.ParkingSpots.Count
-            });
+                TypeName = g.Key.Name,
+                Description = g.Key.Description,
+                TotalCount = total,
+                AvailableCount = available,
+                OccupiedCount = total - available,
+                DailyMaxCap = g.Key.Fee?.DailyMaxCap,
+                HourlyRate = hourlyRate,
+                PricingDetails = hourlyRate.HasValue
+                    ? $"Taxa por Hora: {hourlyRate:C2}. Máximo Diário: {g.Key.Fee?.DailyMaxCap:C2}."
+                    : "Preço não configurado."
+            };
+        })
+        .ToList();
+
+            var detailedSpots = parkingLot.ParkingSpots
+                .Select(ps => new ParkingSpotSummaryDto
+                {
+                    Id = ps.Id,
+                    SpotName = ps.SpotName,
+                    FloorLevel = ps.FloorLevel,
+                    Status = ps.Status.ToString(),
+                    TypeName = ps.SpotType?.Name ?? "N/A"
+
+                })
+                 .OrderBy(s => s.FloorLevel).ThenBy(s => s.SpotName)
+                 .ToList();
+
+            return new ParkingLotDetailDto
+            {
+                Id = parkingLot.Id,
+                Name = parkingLot.Name,
+                Address = parkingLot.Address,
+                Description = parkingLot.Description,
+                OperatingHours = parkingLot.OperatingHours,
+                Latitude = parkingLot.Latitude,
+                Longitude = parkingLot.Longitude,
+                TotalSpots = totalSpots,
+                AvailableSpots = availableSpots,
+                OccupiedSpots = occupiedSpots,
+                OccupancyPercentage = totalSpots > 0 ? Math.Round((double)occupiedSpots / totalSpots * 100, 2) : 0,
+                SpotTypesDetails = spotTypesDetails,
+                Spots = detailedSpots
+            };
         }
 
         /// <inheritdoc/>
-        public async Task<ParkingLotDto?> GetParkingLotByIdAsync(Guid id)
+        public async Task<IEnumerable<ParkingLotDetailDto>> GetAllParkingLotsAsync()
+        {
+            var parkingLots = await _parkingLotRepository.GetAllWithSpotCountAsync();
+
+            return parkingLots.Select(MapToDetailDto);
+        }
+
+        /// <inheritdoc/>
+        public async Task<ParkingLotDetailDto?> GetParkingLotByIdAsync(Guid id)
         {
             var parkingLot = await _parkingLotRepository.GetParkingLotWithSpotsAsync(id);
 
@@ -41,13 +97,7 @@ namespace ParkingSystem.Services.Implementations
                 return null;
             }
 
-            return new ParkingLotDto
-            {
-                Id = parkingLot.Id,
-                Name = parkingLot.Name,
-                Address = parkingLot.Address,
-                TotalSpots = parkingLot.ParkingSpots.Count
-            };
+            return MapToDetailDto(parkingLot);
         }
 
         /// <inheritdoc/>
@@ -57,8 +107,12 @@ namespace ParkingSystem.Services.Implementations
             {
                 Name = createDto.Name,
                 Address = createDto.Address,
-                Description = createDto.Description
+                Description = createDto.Description,
+                OperatingHours = createDto.OperatingHours,
+                Latitude = createDto.Latitude,
+                Longitude = createDto.Longitude
             };
+
 
             await _parkingLotRepository.AddAsync(parkingLot);
             await _parkingLotRepository.SaveChangesAsync();
@@ -68,7 +122,7 @@ namespace ParkingSystem.Services.Implementations
                 Id = parkingLot.Id,
                 Name = parkingLot.Name,
                 Address = parkingLot.Address,
-                TotalSpots = 0 // New parking lot has no spots yet
+                TotalSpots = 0
             };
         }
 
@@ -85,6 +139,9 @@ namespace ParkingSystem.Services.Implementations
             parkingLot.Name = updateDto.Name;
             parkingLot.Address = updateDto.Address;
             parkingLot.Description = updateDto.Description;
+            parkingLot.OperatingHours = updateDto.OperatingHours;
+            parkingLot.Latitude = updateDto.Latitude;
+            parkingLot.Longitude = updateDto.Longitude;
 
             _parkingLotRepository.Update(parkingLot);
             return await _parkingLotRepository.SaveChangesAsync();
